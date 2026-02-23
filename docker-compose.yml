@@ -5,7 +5,10 @@ services:
   llm-router-redis:
     image: redis:7-alpine
     container_name: llm-router-redis
+    volumes:
+      - ${HOME}/app_data/llm-router/redis:/data
     restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
     networks:
       - internal-network
 
