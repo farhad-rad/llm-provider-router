@@ -1,0 +1,29 @@
+version: "3.9"
+
+services:
+
+  llm-router-redis:
+    image: redis:7-alpine
+    container_name: llm-router-redis
+    restart: unless-stopped
+    networks:
+      - internal-network
+
+  llm-router:
+    build: .
+    container_name: llm-router
+    restart: unless-stopped
+    env_file:
+      - .env
+    depends_on:
+      - llm-router-redis
+    networks:
+      - internal-network
+      - proxy-network
+
+networks:
+  internal-network:
+    driver: bridge
+
+  proxy-network:
+    external: true
