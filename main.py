@@ -95,7 +95,7 @@ async def forward(request: Request):
 
 
 @app.api_route(
-    "/v1/{path:path}",
+    "/{path:path}",
     methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
 )
 async def proxy(request: Request):
