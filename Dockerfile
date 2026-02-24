@@ -1,13 +1,14 @@
-FROM python:3.11-slim
+FROM node:22-alpine
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y curl \
-    && rm -rf /var/lib/apt/lists/*
-
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+COPY package.json package-lock.json* ./
+RUN npm install --omit=dev
 
 COPY . .
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+RUN npm run build
+
+EXPOSE 8000
+
+CMD ["node", "dist/server.js"]
