@@ -21,18 +21,32 @@ export async function handleProxy(
 
 	try {
 		console.log(`[PROXY] Forwarding request to ${provider.baseURL}${req.originalUrl}`);
+		console.log(`[PROXY] Request body:`, JSON.stringify(req.body).substring(0, 200));
+		console.log(`[PROXY] Request headers:`, Object.keys(req.headers));
+		
+		const cleanHeaders = { ...req.headers };
+		delete cleanHeaders.host;
+		delete cleanHeaders.connection;
+		delete cleanHeaders['content-length'];
+		delete cleanHeaders['accept-encoding'];
+		console.log(`[PROXY] Cleaned headers:`, Object.keys(cleanHeaders));
+		
+		const startTime = Date.now();
+		console.log(`[PROXY] Starting request at ${startTime}`);
+		
 		const response = await axios({
 			                             method: req.method,
 			                             url: provider.baseURL + req.originalUrl,
 			                             headers: {
-				                             ...req.headers,
+				                             ...cleanHeaders,
 				                             Authorization: `Bearer ${provider.apiKey}`,
-				                             host: undefined,
 			                             },
 			                             data: req.body,
 			                             responseType: "stream",
 			                             validateStatus: () => true,
+			                             timeout: 0,
 		                             });
+		console.log(`[PROXY] Request completed in ${Date.now() - startTime}ms`);
 		console.log(`[PROXY] Received response with status: ${response.status}`);
 
 		// If limit error → invalidate + retry
@@ -60,6 +74,18 @@ export async function handleProxy(
 
 	} catch (err: any) {
 		console.error(`[PROXY] Exception occurred:`, err.message);
+		console.error(`[PROXY] Error code:`, err.code);
+		console.error(`[PROXY] Error syscall:`, err.syscall);
+		console.error(`[PROXY] Error errno:`, err.errno);
+		console.error(`[PROXY] Error address:`, err.address);
+		console.error(`[PROXY] Error port:`, err.port);
+		if (err.errors && Array.isArray(err.errors)) {
+			console.error(`[PROXY] Aggregate errors count:`, err.errors.length);
+			err.errors.forEach((e: any, i: number) => {
+				console.error(`[PROXY] Aggregate error ${i}:`, e.message, e.code, e.syscall);
+			});
+		}
+		console.error(`[PROXY] Error stack:`, err.stack);
 		res.status(500).json({ error: "Proxy failure" });
 	}
 }
