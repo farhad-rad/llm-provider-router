@@ -15,6 +15,7 @@ services:
       - "8000"
 
   llm-router-redis:
+    container_name: llm-router-redis
     image: redis:7
     volumes:
       - $HOME/app_data/llm-router/redis:/data
