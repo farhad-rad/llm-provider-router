@@ -2,15 +2,17 @@ version: "3.9"
 
 services:
   llm-router:
+    container_name: llm-router
     build: .
     env_file:
       - .env
     networks:
       - internal
+      - proxy-network
     depends_on:
       - llm-router-redis
-    ports:
-      - "9632:8000"
+    expose:
+      - "8000"
 
   llm-router-redis:
     image: redis:7
@@ -22,3 +24,6 @@ services:
 networks:
   internal:
     driver: bridge
+
+  proxy-network:
+    external: true
