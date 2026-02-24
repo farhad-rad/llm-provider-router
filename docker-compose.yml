@@ -20,8 +20,8 @@ services:
       - .env
     depends_on:
       - llm-router-redis
-    expose:
-      - "8000"
+    ports:
+      - "9632:8000"
     networks:
       - internal-network
       - proxy-network
